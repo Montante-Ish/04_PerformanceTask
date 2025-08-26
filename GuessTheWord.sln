@@ -1,25 +1,78 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36401.2 d17.14
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Csharp_GuessWordGame", "GuessTheWord\Csharp_GuessWordGame.csproj", "{51DFD711-E552-4562-84AA-5EB5941B3BDE}"
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{51DFD711-E552-4562-84AA-5EB5941B3BDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{51DFD711-E552-4562-84AA-5EB5941B3BDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{51DFD711-E552-4562-84AA-5EB5941B3BDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{51DFD711-E552-4562-84AA-5EB5941B3BDE}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {B2D74753-5FD6-4A9A-AB66-1D8BF536A40F}
-	EndGlobalSection
-EndGlobal
+using System.Text;
+
+namespace GuessTheWord
+{
+    public partial class Csharp_GuessWordGame : Form
+    {
+        private string secretWord = "Windows"; 
+        private string hiddenWord; 
+
+        public Csharp_GuessWordGame()
+        {
+            InitializeComponent();
+            InitializeGame();
+        }
+
+        private void InitializeGame()
+        {
+           
+            var sb = new StringBuilder(secretWord);
+            for (int i = 1; i < secretWord.Length - 1; i++)
+            {
+                if (char.IsLetter(secretWord[i]))
+                    sb[i] = '?';
+            }
+
+            hiddenWord = sb.ToString();
+            lblWord.Text = hiddenWord;  
+        }
+
+       
+        private string Normalize(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return string.Empty;
+            var sb = new StringBuilder();
+            foreach (char c in s)
+                if (char.IsLetterOrDigit(c))
+                    sb.Append(char.ToLowerInvariant(c));
+            return sb.ToString();
+        }
+
+        private void btnGuess_Click(object sender, EventArgs e)
+        {
+            string guess = txtGuess.Text.Trim();
+
+            if (string.IsNullOrEmpty(guess))
+            {
+                MessageBox.Show("Please enter a guess!", "Error");
+                return;
+            }
+
+            string normalizedGuess = Normalize(guess);
+            string normalizedSecret = Normalize(secretWord);
+
+
+            if (normalizedGuess == normalizedSecret)
+            {
+                lblWord.Text = secretWord;
+                MessageBox.Show("Correct guess!");
+            }
+            else
+            {
+              
+                ListBox lb = this.Controls.Find("WrongGuess1", true).FirstOrDefault() as ListBox
+                             ?? this.Controls.Find("WrongGuess", true).FirstOrDefault() as ListBox;
+
+                if (lb != null)
+                    lb.Items.Add(guess);
+                else
+                    System.Diagnostics.Debug.WriteLine("ListBox for wrong guesses not found (expected 'WrongGuess' or 'WrongGuess1').");
+
+                MessageBox.Show("Wrong guess! Try again.");
+            }
+
+            txtGuess.Clear();
+            txtGuess.Focus();
+        }
+    }
+}
